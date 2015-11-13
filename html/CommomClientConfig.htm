@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>  
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="UTF-8" />  
+
+    <title>编辑器</title>  
+    <link rel="stylesheet" type="text/css" href="./jui/themes/default/easyui.css">  
+    <link rel="stylesheet" type="text/css" href="./jui/themes/icon.css">  
+    <link rel="stylesheet" type="text/css" href="./css/demo.css">  
+	<script type="text/javascript" src="js/FileUnit.js"></script>
+	<script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/csv.js"></script>
+    <script type="text/javascript" src="js/tab-solider.js"></script>
+	<script type="text/javascript" src="jui/jquery.min.js"></script>
+	<script type="text/javascript" src="jui/plugins/jquery.json-2.4.js"></script>
+    <script type="text/javascript" src="jui/easyloader.js"></script>
+    <script type="text/javascript" src="jui/jquery.easyui.min.js"></script>  
+	<script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/DataMgr.js"></script>
+	<script type="text/javascript" src="js/TemplateMgr.js"></script>
+	<link rel="stylesheet" href="kindeditor-4.1.10/themes/default/default.css" />
+	<script charset="utf-8" src="kindeditor-4.1.10/kindeditor.js"></script>
+	<script charset="utf-8" src="kindeditor-4.1.10/lang/zh_CN.js"></script>
+</head>  
+<body onkeydown="enterkey()" onclick="onMouseClick()">  
+
+	<div style="border:1px solid #ace; margin-bottom:1px; background:#fafafa;">
+		<a href="#" class="easyui-menubutton" data-options="menu:'#mm1',iconCls:'icon-document'">文件</a>
+		<a href="#" class="easyui-menubutton" data-options="menu:'#mm2',iconCls:'icon-unknow'">其他</a>
+		<a href="#" class="easyui-menubutton" data-options="menu:'#mm3'">关于</a>
+	</div>
+
+
+	<div id="tab-tree" class="easyui-panel"
+        style="width:500px;height:150px;padding:5px;background:#fafafa;">
+	
+		<div style = "margin:2px"></div>
+	
+		<div id="cc" class="easyui-layout"  data-options="fit:true">
+					<div data-options="region:'west',split:true" style="width:300px;">
+						<div style="margin:2px">
+							<div id="mm" style="width:100px">
+								<div data-options="name:'sn'">sn</div>
+								<div data-options="name:'filename'">文件名</div>
+							</div>
+							<input class="easyui-searchbox" data-options="prompt:'输入sn或文件名',searcher:doSearch, menu:'#mm'" style="width:270px"></input>
+						</div>
+						<div style="margin-top:5px">
+						<ul id="tree" class="easyui-tree" data-options="animate:true,lines:true"></ul>  
+						</div>
+					</div>
+					<div data-options="region:'center'" style="padding:5px;background:#eee;" data-options="fit:true">
+						<div id="tab" class="easyui-tabs" data-options="tools:'#tab-tools', fit:true" >  </div>
+					</div>
+					
+					<div id="tab-tools">
+						<a href="javascript:void(0)" title="保存所有页签" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-saveall'" onclick="saveAll()"></a>
+						<a href="javascript:void(0)" title="关闭当前页签" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'" onclick="removePanel()"></a>
+						<a href="javascript:void(0)" title="当前页签切换全部展开或闭合，数据量大时会比较卡" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-back'" onclick="collapOrExpanseAll()">
+						</a>
+					</div>
+		 </div>
+
+	</div>
+   
+
+<div id="addobject" class="easyui-menu" style="width:120px;">
+	<div onclick="openCurDir()" data-options="iconCls:'icon-explorer'">浏览文件夹</div>
+	<div onclick="contextCmd('svn &update', 'svn &更新')" data-options="iconCls:'icon-svn-update'">svn 更新</div>
+	<div onclick="contextCmd('svn &commit', 'svn &提交')" data-options="iconCls:'icon-svn-commit'">svn 提交</div>
+	<div onclick="contextCmd_unlock()" data-options="iconCls:'icon-svn-lock'">svn 解锁</div>
+	<div onclick="openAllCmd()" data-options="iconCls:'icon-open'">打开所有</div>
+	<div onclick="NewTemplate()" data-options="iconCls:'icon-add'">添加物体</div>
+	<div onclick="exportCSV()" data-options="iconCls:'icon-excel'">导出为csv</div>
+    <div onclick="importCSV()" data-options="iconCls:'icon-excel'">导入为csv</div>
+</div>
+
+<div id="deleteobject" class="easyui-menu" style="width:120px;">
+	<div onclick="contextCmd('svn &update', 'svn 更新')')"data-options="iconCls:'icon-svn-update'">svn 更新</div>
+	<div onclick="contextCmd('svn &commit', 'svn 提交')" data-options="iconCls:'icon-svn-commit'">svn 提交</div>
+	<div onclick="deleteobject()" data-options="iconCls:'icon-remove'">删除</div>
+</div>
+
+<div id="win">
+</div> 
+
+<div id="OpenProjectDialog">
+</div>
+<input type='file' id='fileBrowDig' style="width:10px; visibility:hidden;float:both;position: fixed" />
+
+<div id="mm1" style="width:150px;">
+        <div data-options="iconCls:'icon-open'" onclick="showOpenProjectDialog()">打开工程</div>
+        <div class="menu-sep"></div>  
+</div>
+	
+<div id="mm2" style="width:100px;">
+</div>
+	
+<div id="mm3" class="menu-content" style="background:#f0f0f0;padding:10px;text-align:left">
+        <img src="http://www.jeasyui.com/images/logo1.png" style="width:150px;height:50px">
+        <p style="font-size:14px;color:#444;">本程序由 jQuery EasyUI 构建</p>
+		<p id="version"> </p>
+</div>
+
+
+	<script type="text/javascript">  
+	    $(function () {
+	        var browser = navigator.appName
+	        var version = navigator.appVersion
+	        $("#version").html("Browser name: " + browser + "<br/>" + "Browser version: " + version);
+
+	        $("#tab-tree").panel({ width: window.innerWidth - 20, height: window.innerHeight - 50 });
+			//$("#tab-tree").panel({ width: 1200, height:760 });
+			LoadScript('js/plugin.js')
+	    });
+
+
+        $(window).resize(function () {
+            $("#tab-tree").panel({ width: window.innerWidth - 20, height: window.innerHeight - 50 });
+			//$("#tab-tree").panel({ width: 1200, height:760 });
+        });
+
+    </script>
+</body>
+</html>
