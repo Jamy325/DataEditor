@@ -985,6 +985,9 @@ function commonFormat(val, row) {
 			var indexJs = str.lastIndexOf(".js");
 			if (indexJs > 0){
 				var lastIndexOfpath = str.lastIndexOf("/") ;
+				if (lastIndexOfpath == -1){
+					lastIndexOfpath = str.lastIndexOf("\\") ;
+				}
 				val = str.substr(lastIndexOfpath + 1, indexJs - lastIndexOfpath - 1);
 			}
 			
