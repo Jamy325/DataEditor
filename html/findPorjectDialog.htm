@@ -1,0 +1,37 @@
+﻿	 <div style='margin:0px'>		
+	 
+		<input id='proj' class="easyui-textbox" style="width:500px" />
+		<a id="btn" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick='javascript:selectFile()'>选择文件</a>
+		<div>
+		<blockquote>
+		由于浏览器安全设定， 如果过出现<span style='color:red'>C:\fakepath\game-project.js</span>,
+		导致无法打开工程，请按如下操作：<a href='#' onclick="javascript:exeCmd('cmd /c inetcpl.cpl')"> 打开internet选项 </a> 
+		-> 安全 -> 自定义级别 -> 将本地文件上载至服务器时包含本地目录路径，选中启用,再次打开即可。		
+		</blockquote>			
+		<img src='res/fakepath.png' />			
+		</div>
+    </div>
+	
+	<script>
+	function selectFile(){
+		 //$("#filebox").click();
+		 var val = OpenFileSelectDialog("选择工程文件", "..", "js file(*.js)");
+		 $('#proj').textbox('setValue', val)
+	}
+	
+	setTimeout(function(){
+		try {
+			var f = new parent.File("defaultpaht.js", "r");
+			f.open()
+			f.seekg(0)
+			var str =  f.readAll()
+			f.close()
+			$("#proj").textbox("setValue", str);
+		}
+		catch(e){
+			
+		}
+
+	}, 0);
+	
+	</script>

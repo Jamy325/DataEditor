@@ -1,0 +1,35 @@
+*{
+	font-size:12px;
+}
+body {
+    font-family:helvetica,tahoma,verdana,sans-serif;
+    padding:5px;
+    font-size:13px;
+    margin:0;
+}
+h2 {
+    font-size:18px;
+    font-weight:bold;
+    margin:0;
+    margin-bottom:15px;
+}
+.demo-info{
+	background:#FFFEE6;
+	color:#8F5700;
+	padding:12px;
+}
+
+.btn-separator {
+  float: left;  
+  height: 24px;  
+  border-left: 1px solid LightGrey;  
+  border-right: 0px solid LightGrey;  
+  margin: 1px 1px;  
+} 
+
+blockquote{
+background:#EEF8FF  no-repeat top left;
+border:1px dashed #DDD;
+padding:10px 12px 10px 25px;
+margin:12px 0;
+}
