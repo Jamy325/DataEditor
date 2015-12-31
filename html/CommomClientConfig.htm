@@ -43,6 +43,7 @@
 							<div id="mm" style="width:100px">
 								<div data-options="name:'sn'">sn</div>
 								<div data-options="name:'filename'">文件名</div>
+								<div data-options="name:'reference'">关键字</div>
 							</div>
 							<input class="easyui-searchbox" data-options="prompt:'输入sn或文件名',searcher:doSearch, menu:'#mm'" style="width:270px"></input>
 						</div>
@@ -77,9 +78,10 @@
 </div>
 
 <div id="deleteobject" class="easyui-menu" style="width:120px;">
-	<div onclick="contextCmd('svn &update', 'svn 更新')')"data-options="iconCls:'icon-svn-update'">svn 更新</div>
-	<div onclick="contextCmd('svn &commit', 'svn 提交')" data-options="iconCls:'icon-svn-commit'">svn 提交</div>
+	<div onclick="contextCmd('svn &update', 'svn &更新')"data-options="iconCls:'icon-svn-update'">svn 更新</div>
+	<div onclick="contextCmd('svn &commit', 'svn &提交')" data-options="iconCls:'icon-svn-commit'">svn 提交</div>
 	<div onclick="deleteobject()" data-options="iconCls:'icon-remove'">删除</div>
+	<div onclick="findAllReference()" data-options="iconCls:'icon-reference'">查找所有引用</div>
 </div>
 
 <div id="win">

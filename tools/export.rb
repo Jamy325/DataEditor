@@ -21,6 +21,17 @@ def readFile(path)
 	context.encode("utf-8", "gbk")
 end
 
+@ignoreAllError = false;
+
+def errorProcess(msg, needConfirm)
+	puts msg
+	if needConfirm and !@ignoreAllError then 
+		puts "===>> a:忽悠所有提示,其他任意键忽略本次提示 <<==="
+		input = gets
+		@ignoreAllError = true if input[0] == 'a'
+	end
+end
+
 @commonTemplate = nil
 
 def replaceObject(json, objType, temp, objs)	
@@ -46,8 +57,7 @@ def replaceObject(json, objType, temp, objs)
 				if obj.nil? 
 				puts "template field #{objType["index"]} error ,obj name #{objName} is null" 
 				 if objName != "" then 
-					puts "物体不存在:#{objName}"
-					gets
+					errorProcess("物体不存在:#{objName}", true)
 				 end 					
 				else 
 					sn = obj["fields"]["sn"]
@@ -112,9 +122,7 @@ objs={}
 		fileName=File.basename(curFile, ".js").encode("utf-8", "gbk")
 		
 	  if not objs[fileName].nil? then
-		puts "错误 --- [#{fileName}] 文件名重复"
-		puts "继续?[y]"
-		gets 
+		errorProcess("错误:[#{fileName}]文件名重复", true)
 		break
 	  end
 	  	
@@ -130,9 +138,7 @@ objs={}
 		sn = fields["sn"].to_i
 		#验证SN
 		if sn < snMin || sn > snMax then
-			puts "错误:#{fileName}的sn(#{sn}) 必须在 [#{snMin}, #{snMax})范围内"
-			puts "继续?[y]"
-			gets 
+			errorProcess("错误:#{fileName}的sn(#{sn}) 必须在 [#{snMin}, #{snMax})范围内", true)
 			break
 		end
 			
@@ -180,9 +186,7 @@ allDataSN = {}
 	sn = fileds["sn"].to_i
 	 
 	 if allDataSN[sn] then 
-		puts "错误:sn(#{sn}) 重复"
-		puts "继续?[y]"
-		gets 
+		errorProcess("错误:sn(#{sn}) 重复", true);
 	 end
 	 
 	if sn != 0 then

@@ -311,7 +311,7 @@
         var hearder = strRows[0].split(',');
         if(strRows[0]){
             for(var i=1;i<strRows.length;i++){
-                if(strRows[i]=="")
+                if(strRows[i]=="" || strRows[i]=="undefined")
                     continue;
                 var jsonRowData = {};
                 var cells = strRows[i].split(',');
@@ -328,34 +328,50 @@
 
     CSV.JSONToCVS = function(jsonData){
         var strCVS = "";
-        if(jsonData){
-            var strHeader = "";
-            for(var i in jsonData){
-                var strRow = "";
-                for(var j in jsonData[i]){
-                    if(i==0){
-                        strHeader+=j+",";
-                    }
-
-                    strRow+=jsonData[i][j]+",";
-                }
-
-                strRow = strRow.substr(0,strRow.length-1);
-                strRow+="\n";
-
-                if(i==0){
-                    strHeader = strHeader.substr(0,strHeader.length-1);
-                    strHeader+="\n";
-                    strCVS+=strHeader+strRow;
-                }
-                else
-                    strCVS+=strRow;
-            }
-            strCVS = strCVS.substr(0,strCVS.length-1);
-            return strCVS;
-        }
-        else
+        if(!jsonData)
             return null;
+
+        if(!Array.isArray(jsonData))
+            return null;
+
+        //查找所有字段
+        var fields = [];
+        for(var i= 0,li=jsonData.length;i<li;i++){
+            var rowData = jsonData[i];
+
+            for(var fieldName in rowData) {
+                if (fields.indexOf(fieldName) == -1)
+                    fields.push(fieldName);
+            }
+        }
+
+        //生成表头字符串
+        var strHeader = "";
+        for(var i in fields){
+            strHeader+=fields[i]+",";
+        }
+        strHeader = strHeader.substr(0,strHeader.length-1);
+        strHeader+="\n";
+
+        //生成数据字符串
+        var strRow = "";
+        for(var i= 0,li=jsonData.length;i<li;i++){
+            var rowData = jsonData[i];
+
+            for(var j in fields){
+                var cellValue = rowData[fields[j]] ? rowData[fields[j]]:"";
+                strRow+=cellValue+",";
+            }
+            strRow = strRow.substr(0,strRow.length-1);
+
+            if(i!=li-1)
+                strRow+="\n";
+        }
+
+        strCVS+=strHeader+strRow;
+
+        return strCVS;
+
 
     };
 
