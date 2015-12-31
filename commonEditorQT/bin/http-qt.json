@@ -1,0 +1,6 @@
+{
+	"httpAppPath": "miniweb.exe",
+	"parameter":"-r . -p 3456",
+	"showHttp":0,
+	"index":"http://127.0.0.1/CommomClientConfig.htm"
+}

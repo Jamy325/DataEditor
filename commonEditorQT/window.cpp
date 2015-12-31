@@ -131,7 +131,7 @@ void Window::attachObject()
 QString Window::system(const QString &cmd)
 {
    qDebug() << "js execute cmd:" << cmd;
-   _process->execute("cmd.exe",  QStringList() << "/c" << cmd);
+   _process->start("cmd.exe",  QStringList() << "/c" << cmd);
    _process->waitForStarted(3000);
    _process->waitForFinished(3000);
 
