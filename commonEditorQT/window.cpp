@@ -115,8 +115,55 @@ void Window::keyPressEvent(QKeyEvent *event)
 
              break;
          }
+
+    case Qt::Key_F:
+        {
+            if (event->modifiers() & Qt::ControlModifier){
+                QString selectText = _selectText;
+                if (selectText.isEmpty())
+                {
+                    selectText = webView->selectedText();
+                }
+
+                 bool isOK;
+                QString text = QInputDialog::getText(NULL, tr("find text Dialog"),
+                                                                   tr("please input you want to find"),
+                                                                   QLineEdit::Normal,
+                                                                   selectText,
+                                                                   &isOK);
+                if (isOK){
+                    webView->findText("", QWebPage::FindFlag::HighlightAllOccurrences);
+                    webView->findText(text, QWebPage::FindFlag::HighlightAllOccurrences);
+                    _selectText = text;
+                }
+            }
+            break;
+        }
+    case Qt::Key_F3:{
+        QString selectText = _selectText;
+        if (selectText.isEmpty())
+        {
+           selectText = webView->selectedText();
+        }
+
+         if (!selectText.isEmpty())
+         {
+             webView->findText(selectText);
+         }
+        break;
+    }
+
+    case Qt::Key_Escape:
+        {
+            _selectText = "";
+            webView->findText("", QWebPage::FindFlag::HighlightAllOccurrences);
+        }
+        break;
     }
     QMainWindow::keyPressEvent(event);
+    qDebug() << "keyPressEvent:key:" << event->key()
+             << "sancode:" << event->nativeScanCode()
+             << "virtualcode:" << event->nativeVirtualKey();
 }
 
 //! [导出接口到js]

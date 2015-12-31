@@ -90,7 +90,9 @@ private:
 private:
     QFile* _pFile;
     QProcess* _process;
+    QString _selectText;
 };
+
 //! [Window class definition]
 
 #endif
