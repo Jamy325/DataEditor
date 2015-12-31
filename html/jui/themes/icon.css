@@ -68,6 +68,10 @@
 	background:url('icons/more.png') no-repeat center center;
 }
 
+.icon-reference{
+	background:url('icons/document_quote.png') no-repeat center center;
+}
+
 .icon-explorer{
 	background:url('icons/explorer.jpg') no-repeat center center;
 }

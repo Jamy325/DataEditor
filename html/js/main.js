@@ -1,4 +1,14 @@
 ﻿
+function inArray(val, array){
+	for(var e in array){
+		if (array[e] == val){
+			return e;
+		}
+	}
+	
+	return -1;
+}
+
 function removePanel() {
 
 	var tab = $('#tab').tabs('getSelected');
@@ -47,9 +57,28 @@ function LoadScript(path){
 	            alert(enumName + "未定义")
 	        }
 
+			var filter = typeField.filter;
+			var include = null;
+			var exclude = null;
+			if (filter){
+				include = filter.include;
+				exclude = filter.exclude;			
+			}
+			
 	        var ops = []
 	        for (var k = 0; k < enumJson.length; ++k) {
-	            ops.push({ "value": enumJson[k].value, "name": enumJson[k].name })
+				var eName = enumJson[k].name;
+				var eVal = enumJson[k].value;
+				
+				if (include){
+					if (inArray(eVal, include) != -1) ops.push({ "value": eVal, "name":eName});
+					continue;
+				}else if (exclude){
+					if (inArray(eVal, exclude) == -1) ops.push({ "value": eVal, "name":eName});	
+					continue;					
+				}else{
+					ops.push({ "value": eVal, "name":eName});
+				}	            
 	        }
 
 	        editor = {
@@ -408,7 +437,7 @@ function LoadScript(path){
 	             
 	            }		
 		}
-		
+	
 	    $('#' + tbid).treegrid({
 	        idField: 'id',
 	        treeField: 'name',
@@ -929,6 +958,7 @@ $.extend($.fn.datagrid.defaults.editors, {
     }
 });
 
+
 function deleteobject() {
     var tree = $('#tree')
     var node = tree.tree("getSelected")
@@ -956,14 +986,24 @@ function commonFormat(val, row) {
         }
 		
         if (typeof (enumVal) == 'undefined') {
-           return  "<span style='color:black;background-color:red'>"+ val +"</span>" + "<span style='color:red;font-weight:bold;'>(枚举类型不存在)</span>";
+           return  "<span style='color:black;background-color:red'>" + val + "</span>" + "<span style='color:red;font-weight:bold;'>(枚举类型不存在)</span>";
         }
+		
+		var filter = row.field.type.filter;
 
         //枚举不一定是从０开始的
         for (var i = 0; i < enumVal.length; ++i) {
-            if (enumVal[i].value == val) {
-                var valName = enumVal[i].name
-                return valName + " (<span style='color:deeppink'>" + val + "</span>)"
+            if (enumVal[i].value == val) {		
+				var valName = enumVal[i].name
+			
+				if (filter && filter.include && inArray(val, filter.include) == -1){
+					return  "<span style='color:black;background-color:red'>" + valName + "</span>" + "<span style='color:red;font-weight:bold;'>(无效)</span>";			
+				}
+				else if(filter && filter.exclude && inArray(val, filter.exclude) != -1){
+					return  "<span style='color:black;background-color:red'>" + valName + "</span>" + "<span style='color:red;font-weight:bold;'>(无效)</span>";			
+				}
+       
+                return valName + " (<span style='color:deeppink'>" + val + "</span>)";
             }
         }
 	
@@ -985,6 +1025,9 @@ function commonFormat(val, row) {
 			var indexJs = str.lastIndexOf(".js");
 			if (indexJs > 0){
 				var lastIndexOfpath = str.lastIndexOf("/") ;
+				if (lastIndexOfpath == -1){
+					lastIndexOfpath = str.lastIndexOf("\\") ;
+				}
 				val = str.substr(lastIndexOfpath + 1, indexJs - lastIndexOfpath - 1);
 			}
 			
@@ -1520,10 +1563,27 @@ function doSearch(value, name) {
 			return false;
 		});	
 	}
-	else if (name === "sn"){
-		var sn = parseInt(value);
-		if (sn){
-			return searchByCondition(sn, function(node){
+	else if (name === "sn"){	
+		return searchByCondition(value, function(node){
+			var sn = parseInt(value);
+			var path = node.attributes.path;
+			if (!path){
+				return false;
+			}
+			
+			var data = DataMgr.getInstance().get(path);
+			if (!data) {
+				return false;
+			}
+
+			if (data.fields.sn != sn) {
+				return false;
+			}
+
+			return true;
+		});
+	}else if (name == "reference"){
+		return searchByCondition(value, function (node) {
 				var path = node.attributes.path;
 				if (!path){
 					return false;
@@ -1531,19 +1591,15 @@ function doSearch(value, name) {
 				
 				var data = DataMgr.getInstance().get(path);
 				if (!data) {
-				    return false;
+					return false;
 				}
 
-				if (data.fields.sn != sn) {
-				    return false;
+				var fields = JSON.stringify(data.fields);
+				if (fields.indexOf(value) == -1) {
+					return false;
 				}
-
-				return true;
-			});
-		}
-		else {
-			return searchByCondition("");
-		}
+			return true;
+		});
 	}
 }
 
@@ -1700,4 +1756,18 @@ function openCurDir(){
 	
 	var path = node.attributes.path;
 	exeCmd("explorer " + path)
+}
+
+function findAllReference(){
+	var tree = $('#tree')
+    var node = tree.tree("getSelected");
+	if (node == null) return;
+	//不是叶子节点
+	if(!$('#tree').tree("isLeaf",  node.target)){
+		return;
+	}
+	
+	var value = node.id;
+
+	doSearch(value, "reference");
 }

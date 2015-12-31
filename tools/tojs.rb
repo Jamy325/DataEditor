@@ -27,6 +27,8 @@ INDEX = "index"
 INIT = "init"
 VALUE = "value"
 TABLE = "table"
+MIN_SN = "sn_min";
+MAX_SN = "sn_max";
 
 @objectNameCache = {}
 
@@ -336,7 +338,8 @@ name="Template#{key.capitalize}"
 FileName = name.upcase
 className = name
 TemplateName = key;
-
+minSN = tJson[BASE][MIN_SN]
+maxSN = tJson[BASE][MAX_SN]
 
 
 factory_create = <<EOF 
@@ -381,6 +384,7 @@ fileds.each do |e|
 	getter += mg	
 	reaeJson += mgi
 end
+
 
 hpp = "%Q{"+readFile("js.tpl")+"}"
 result = eval(hpp);
