@@ -181,6 +181,8 @@ objs={}
  
 puts "begin write file"
 allDataSN = {}
+allClassSNMap = {};
+
  jsons.each do |e|
 	fileds = e["fields"]
 	sn = fileds["sn"].to_i
@@ -190,11 +192,22 @@ allDataSN = {}
 	 end
 	 
 	if sn != 0 then
-	allDataSN[sn] = e;
+		allDataSN[sn] = e;
+		arr = allClassSNMap[fileds["_className"]];
+		if arr.nil? then 
+			allClassSNMap[fileds["_className"]] = [];
+			arr = allClassSNMap[fileds["_className"]];
+		end
+		
+		arr << sn
 		File.open("data/#{sn}.js", "w") do |f|
 			f.write fileds.to_json.gsub(/\\\\n/, "\\n")
 		end
 	end
+ end
+ 
+ File.open("data/sn.js", "w") do |f|
+	f.write allClassSNMap.to_json.gsub(/\\\\n/, "\\n")
  end
  
  

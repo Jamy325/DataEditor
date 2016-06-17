@@ -470,11 +470,12 @@ function LoadScript(path){
 		LoadScript(projPath)
 		
 		//等待配置加载完成
-		setTimeout(function () {
+	var id =	setTimeout(function () {
+		clearTimeout(id);
 		    //读取工程文件数据
 		    var dataMgr = DataMgr.getInstance();
-		    dataMgr.init(ProjConfig);
-		    projectOpen(dataMgr.getTreeMenu());
+		   dataMgr.init(ProjConfig);
+		   projectOpen(dataMgr.getTreeMenu());
 		}, 0);
 		
 	}
@@ -497,6 +498,7 @@ function LoadScript(path){
 		        e.preventDefault();
 		        // select the node
 		        $('#tree').tree('select', node.target);
+				
 		        // display context menu
 		        //不是叶子节点
 		        if ($('#tree').tree("isLeaf", node.target)) {
@@ -511,6 +513,22 @@ function LoadScript(path){
 		            left: e.pageX,
 		            top: e.pageY
 		        });
+				
+				 var root = getCurNodeRoot($('#tree'), node);
+				if (root == null) return;
+
+				var addObjectMenu = $('#addobject');
+				var importCsvItem = addObjectMenu.menu('findItem', '导出为csv');
+				var exportCsvItem = addObjectMenu.menu('findItem', '导入为csv');
+					
+				if (root != node){			
+					addObjectMenu.menu('disableItem', importCsvItem.target);
+					addObjectMenu.menu('disableItem', exportCsvItem.target);
+				}else{
+					addObjectMenu.menu('enableItem', importCsvItem.target);
+					addObjectMenu.menu('enableItem', exportCsvItem.target);									
+				}
+				
 		    },
 		    onClick: function (node) {
 		        var jtbid = window.editor.curTreeGrid;
@@ -687,7 +705,12 @@ function NewTemplate() {
 				return;
 			}
 			
-			var snJson = $.parseJSON(snStrs);
+			try{
+					var snJson = $.parseJSON(snStrs);
+			}catch(e){
+				 $.messager.alert("error", snfile + ",文件错误,请恢复到正确版本")
+			}
+		
 			
 			//新加一个标签页
            var tab = addTab(title, "new_" + title, templateName, path, snJson.next_sn)
@@ -1203,7 +1226,11 @@ function exportCSV(){
 	var tree = $('#tree')
     var node = tree.tree("getSelected")
 	if (node == null) return;	
-	var paths = tree.tree("getData", node.target).children;
+	
+	var root = getCurNodeRoot(tree, node);
+    if (root == null) return;
+	
+	var paths = tree.tree("getData", root.target).children;
 	
 	if (path == ""){
 		return;
@@ -1212,18 +1239,28 @@ function exportCSV(){
 	var s = ""
 	var csvTable = []
 	var templateCommon = DataMgr.getInstance().getTemplate("common");
+	
+	function processNode(elementNode){
+		var nodes = elementNode.children;
+		if (nodes) {
+			for(var i = 0; i < nodes.length; ++i){
+				processNode(nodes[i])
+			}
+			return;
+		}
 		
-	for (var i = 0; i < paths.length; ++i) {
-	    var fileName = paths[i].attributes.path;
-	    var f = new File(fileName, "r");
-	    f.open()
-	    f.seekg(0)
-	    var jsonStr = f.readAll();
-	    f.close()
+		var fileName = elementNode.attributes.path;
+		if (!fileName.match("^.*\.js$")) return;
 		
-	    var json = JSON.parse(jsonStr);
+		var f = new File(fileName, "r");
+		f.open()
+		f.seekg(0)
+		var jsonStr = f.readAll();
+		f.close()
+		
+		var json = JSON.parse(jsonStr);
 		var fiels = json.fields;
-	    var tab = { n: [], data: {"fileName":fileName}}
+		var tab = { n: [], data: {"fileName":fileName}}
 		//var tab1 = { n: [], data: {}}
 		var template = DataMgr.getInstance().getTemplate(json.base.template);
 		var templateFields = template.fields;
@@ -1235,12 +1272,16 @@ function exportCSV(){
 			templateJson2CSV(fieldInfo, fieldInfo.name, key, value,tab, template, templateCommon);
 		}
 		/*
-	    for (var e in fiels) {
-	        json2CSV(e, fiels[e], tab);
-	    }*/
-        csvTable.push(tab)
+		for (var e in fiels) {
+			json2CSV(e, fiels[e], tab);
+		}*/
+		csvTable.push(tab)			
 	}
 
+	for (var i = 0; i < paths.length; ++i) {
+		processNode(paths[i]);
+	}
+	
 	var head = [{key:"fileName", name:"文件路径"}]
 	for (var i = 0; i < csvTable.length; ++i) {
 	    var row = csvTable[i];
@@ -1308,7 +1349,7 @@ function importCSV(){
     var root = getCurNodeRoot(tree, node);
 
     if (root == null) return;
-	var templateName = node.text;
+	var templateName = root.text;
 	
 	//获取锁
 	var objDir = root.attributes.path;
@@ -1335,9 +1376,9 @@ function importCSV(){
         return;
     }
 
-	exeCmd("move /y" + objDir+"\\_info.js " +objDir +"\\_info.bak");
-	exeCmd("del /q " + objDir+"\\*.js");
-	exeCmd("move /y" + objDir+"\\_info.bak " +objDir +"\\_info.js");
+	exeCmd("move /y " + objDir+"\\_info.js " +objDir +"\\_info.bak");
+	exeCmd("del /s /q " + objDir+"\\*.js");
+	exeCmd("move /y " + objDir+"\\_info.bak " +objDir +"\\_info.js");
 	
 	try{
 		//读取csv文件
@@ -1732,17 +1773,27 @@ function openTabByName(dir, name){
 	var tree = $('#tree')
 	var opts=tree.tree("options");
 	var root=tree.tree('getRoots');
+	
 	for(var k = 0; k < root.length; ++k){
 		var node = root[k]
 		if (node.text == dir){
-			var children = node.children;	
-			for(var i = 0; i < children.length; ++i){
-				var e = children[i];	
-				if (e.text == name){
-					opts.onClick.call(tree, e);
-					break;
+			
+			function opera(node){
+				if (node.text == name){
+					opts.onClick.call(tree, node);
+					return true;
 				}
+				
+				var children = node.children || [];
+				for(var i = 0; i < children.length; ++i){
+					var e = children[i];	
+					if (opera(e)) return true;
+				}
+
+				return false;
 			}
+			
+			opera(node);
 			break;
 		}
 		

@@ -1,8 +1,8 @@
 
 var mm2 = $('#mm2') //菜单栏 - 其他 
 
-//菜单栏 - 其他 - 新场景编辑
-var mm2TabSkillTitle = '新场景编辑'
+//菜单栏 - 其他 - 游戏作弊
+var mm2TabSkillTitle = '游戏作弊'
 mm2.menu('appendItem', {
 	text: mm2TabSkillTitle,
 	iconCls: 'icon-ok',
@@ -18,7 +18,7 @@ mm2.menu('appendItem', {
 		//添加tab		
 	   var newTab = $('#tab').tabs('add', {
 	        title: mm2TabSkillTitle,
-	        content: "<iframe src='game-editor/scene-jsb.html?_=" + rand+"' width='99%' height='99%'/>",
+	        content: "<iframe src='game-editor/cheat.html?_=" + rand+"' width='99%' height='99%'/>",
 	        closable: true
 	    });
 		

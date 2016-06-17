@@ -43,6 +43,27 @@ function GetAllInDir(path) {
     return window.external.getDir(path);
 }
 
+function GetAllFileInDir(path) {
+	if (!path) throw "invalid path";
+	var root ={children: JSON.parse(window.external.getDir(path))};
+
+	function getFile(node,fileNodes){
+		if(node.children){
+			node.children.forEach(function(childNode){
+				getFile(childNode,fileNodes);
+			});
+		}
+		else{
+			fileNodes.push(node);
+		}
+	};
+
+	var allFile = [];
+	getFile(root,allFile);
+	return allFile;
+}
+
+
 
 function GetPathFileName(path){
 	var value=path;
@@ -88,3 +109,5 @@ function readJsFileToJson(path) {
         return null;
     }
 }
+
+window.external.close = function(){}
